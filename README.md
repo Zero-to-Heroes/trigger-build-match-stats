@@ -1,7 +1,7 @@
 # Test it
 
 ```
-sam local start-api
+npm run build && sam local invoke -t template.yaml -e event.json BuildMatchStatsFunction
 ```
 
 # Deploy

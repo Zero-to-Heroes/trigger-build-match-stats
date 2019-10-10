@@ -72,6 +72,7 @@ export class Rds {
 
 					connection.on('error', function(err) {
 						console.error('Issue in connection', err);
+						connection.release();
 						reject();
 						return;
 					});

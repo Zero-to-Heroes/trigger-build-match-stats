@@ -10,9 +10,10 @@ Resources:
         Properties:
             Handler: build-match-stats.default
             Runtime: nodejs8.10
-            Timeout: 180
+            Timeout: 360
             Tracing: Active
             CodeUri: ./dist/build-match-stats
+            MemorySize: 512
             Policies:
                 - AWSLambdaVPCAccessExecutionRole
                 - AmazonSESFullAccess
@@ -23,4 +24,3 @@ Resources:
                     Type: SNS
                     Properties:
                         Topic: arn:aws:sns:us-west-2:478062583808:review-published
-

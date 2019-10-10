@@ -7,9 +7,11 @@ import { StatsBuilder } from './stats-builder';
 // [1]: https://aws.amazon.com/blogs/compute/node-js-8-10-runtime-now-available-in-aws-lambda/
 export default async (event): Promise<any> => {
 	// console.log('event', JSON.stringify(event));
-	const messages: readonly ReviewMessage[] = event.Records.map(record => record.Sns.Message).map(msg => JSON.parse(msg));
+	const messages: readonly ReviewMessage[] = event.Records.map(record => record.Sns.Message).map(msg =>
+		JSON.parse(msg),
+	);
 	// console.log('input', JSON.stringify(messages));
 	const stats: readonly MatchStats[] = await new StatsBuilder().buildStats(messages);
 	// console.log('built stats', JSON.stringify(stats));
-	return { statusCode: 200, body: '' };
+	return { statusCode: 200, body: JSON.stringify(stats) };
 };
