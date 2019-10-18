@@ -8,7 +8,6 @@ npm run build && sam local invoke -t template.yaml -e event.json BuildMatchStats
 
 ```
 npm run build && npm run package && npm run deploy
-npm run build; npm run package; npm run deploy
 ```
 
 # Reference

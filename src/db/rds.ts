@@ -70,12 +70,12 @@ export class Rds {
 						}
 					});
 
-					connection.on('error', function(err) {
-						console.error('Issue in connection', err);
-						connection.release();
-						reject();
-						return;
-					});
+					// connection.on('error', function(err) {
+					// 	console.error('Issue in connection', err);
+					// 	connection.release();
+					// 	reject();
+					// 	return;
+					// });
 				});
 			} catch (e) {
 				console.error('Could not connect to DB', e);
