@@ -19,6 +19,12 @@ export class StatsBuilder {
 	}
 
 	private async buildStat(message: ReviewMessage): Promise<MatchStats> {
+		console.log('processing message', message);
+		if (message.gameMode == 'arena-draft') {
+			console.log('arena draft, not processing');
+			return null;
+		}
+		console.log('building stat for', message.reviewId, message.replayKey);
 		const replayString = await this.loadReplayString(message.replayKey);
 		console.log('loaded replay string', replayString.length);
 		const gameStates = await this.getFinalGameState(replayString);
