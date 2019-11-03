@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { Game, GameParserService } from '@firestone-hs/replay-parser';
+import { CardType, Game, GameParserService, GameTag } from '@firestone-hs/replay-parser';
+import { parse } from 'elementtree';
 import fetch, { RequestInfo } from 'node-fetch';
 // import { fetch } from 'node-fetch';
 import { Rds } from './db/rds';
 import { MatchStats } from './match-stats';
+import { Replay } from './replay';
 import { ReviewMessage } from './review-message';
 import { TotalCardPlayedBuilder } from './stat-builders/total-cards-played-builder';
 import { TotalManaSpentBuilder } from './stat-builders/total-mana-spent-builder';
@@ -26,12 +28,13 @@ export class StatsBuilder {
 		}
 		console.log('building stat for', message.reviewId, message.replayKey);
 		const replayString = await this.loadReplayString(message.replayKey);
+		if (!replayString || replayString.length === 0) {
+			console.log('empty replay, returning');
+			return null;
+		}
 		console.log('loaded replay string', replayString.length);
-		const gameStates = await this.getFinalGameState(replayString);
-		console.log('parsed game state', gameStates.turns.size);
-		const stats = await Promise.all(
-			StatsBuilder.statBuilders.map(builder => builder.extractStat(message, gameStates)),
-		);
+		const replay: Replay = this.buildReplay(replayString);
+		const stats = await Promise.all(StatsBuilder.statBuilders.map(builder => builder.extractStat(message, replay)));
 		console.log('built stats', stats);
 		const result = Object.assign(
 			new MatchStats(),
@@ -44,6 +47,25 @@ export class StatsBuilder {
 		console.log('saving result', result);
 		await this.saveStat(result);
 		return result;
+	}
+
+	private buildReplay(replayString: string): Replay {
+		const elementTree = parse(replayString);
+		const mainPlayerId = elementTree
+			.findall(`.//ShowEntity`)
+			.filter(showEntity => showEntity.get('cardID'))
+			.filter(showEntity => {
+				const cardTypeTag = showEntity.find(`Tag[@tag='${GameTag.CARDTYPE}']`);
+				return !cardTypeTag || parseInt(cardTypeTag.get('value')) !== CardType.ENCHANTMENT;
+			})
+			.filter(showEntity => showEntity.find(`Tag[@tag='${GameTag.CONTROLLER}']`))
+			.map(showEntity => showEntity.find(`Tag[@tag='${GameTag.CONTROLLER}']`))
+			.map(tag => parseInt(tag.get('value')))
+			.find(controllerId => controllerId);
+		return Object.assign(new Replay(), {
+			replay: elementTree,
+			mainPlayerId: mainPlayerId,
+		} as Replay);
 	}
 
 	private async getFinalGameState(replayString: string): Promise<Game> {

@@ -1,7 +1,7 @@
-import { Game } from '@firestone-hs/replay-parser';
 import { MatchStats } from '../match-stats';
+import { Replay } from '../replay';
 import { ReviewMessage } from '../review-message';
 
 export interface StatBuilder {
-	extractStat(message: ReviewMessage, game: Game): Promise<MatchStats>;
+	extractStat(message: ReviewMessage, replay: Replay): Promise<MatchStats>;
 }
