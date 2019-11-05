@@ -13,7 +13,7 @@ Resources:
             Timeout: 360
             Tracing: Active
             CodeUri: ./dist/build-match-stats
-            MemorySize: 512
+            MemorySize: 128
             Policies:
                 - AWSLambdaVPCAccessExecutionRole
                 - AmazonSESFullAccess
