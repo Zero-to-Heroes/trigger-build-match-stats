@@ -29,6 +29,7 @@
 		"ngx-logger": "3.3.11",
 		"node-fetch": "^2.6.0",
 		"sax": "1.2.4",
+		"serverless-mysql": "^1.5.1",
 		"tslib": "^1.9.0",
 		"xhr2": "^0.2.0"
 	},

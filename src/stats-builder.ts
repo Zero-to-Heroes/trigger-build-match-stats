@@ -2,8 +2,7 @@
 import { CardType, Game, GameParserService, GameTag } from '@firestone-hs/replay-parser';
 import { parse } from 'elementtree';
 import fetch, { RequestInfo } from 'node-fetch';
-// import { fetch } from 'node-fetch';
-import { Rds } from './db/rds';
+import db from './db/rds';
 import { MatchStats } from './match-stats';
 import { Replay } from './replay';
 import { ReviewMessage } from './review-message';
@@ -82,8 +81,8 @@ export class StatsBuilder {
 	}
 
 	private async saveStat(stat: MatchStats): Promise<void> {
-		const rds = await Rds.getInstance();
-		await rds.runQuery<void>(`
+		const mysql = await db.getConnection();
+		await mysql.query(`
 			INSERT INTO match_stats (
 				reviewId, 
 				replayKey,
