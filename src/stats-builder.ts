@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { CardType, Game, GameParserService, GameTag } from '@firestone-hs/replay-parser';
+import { CardType, GameTag } from '@firestone-hs/replay-parser';
 import { parse } from 'elementtree';
 import fetch, { RequestInfo } from 'node-fetch';
 import db from './db/rds';
@@ -12,7 +12,6 @@ import { TotalTurnsBuilder } from './stat-builders/total-turns-builder';
 import { StatBuilder } from './stat-builders/_stat-builder';
 
 export class StatsBuilder {
-	private static parser: GameParserService;
 	private static readonly statBuilders: readonly StatBuilder[] = StatsBuilder.initializeBuilders();
 
 	public async buildStats(messages: readonly ReviewMessage[]): Promise<readonly MatchStats[]> {
@@ -67,19 +66,6 @@ export class StatsBuilder {
 		} as Replay);
 	}
 
-	private async getFinalGameState(replayString: string): Promise<Game> {
-		return new Promise<Game>(async resolve => {
-			const parser = await this.getParser();
-			const obs = await parser.parse(replayString);
-			const sub = obs.subscribe(([game, status, complete]: [Game, string, boolean]) => {
-				if (complete && game) {
-					sub.unsubscribe();
-					resolve(game);
-				}
-			});
-		});
-	}
-
 	private async saveStat(stat: MatchStats): Promise<void> {
 		const mysql = await db.getConnection();
 		await mysql.query(`
@@ -106,15 +92,6 @@ export class StatsBuilder {
 	private async loadReplayString(replayKey: string): Promise<string> {
 		const data = await http(`https://s3-us-west-2.amazonaws.com/com.zerotoheroes.output/${replayKey}`);
 		return data;
-	}
-
-	private async getParser(): Promise<GameParserService> {
-		if (StatsBuilder.parser) {
-			console.log('returning cached parser');
-			return StatsBuilder.parser;
-		}
-		StatsBuilder.parser = await GameParserService.create();
-		return StatsBuilder.parser;
 	}
 
 	private static initializeBuilders(): readonly StatBuilder[] {
