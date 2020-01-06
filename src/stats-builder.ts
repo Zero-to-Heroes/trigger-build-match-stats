@@ -19,21 +19,21 @@ export class StatsBuilder {
 	}
 
 	private async buildStat(message: ReviewMessage): Promise<MatchStats> {
-		console.log('processing message', message);
+		// console.log('processing message', message);
 		if (message.gameMode == 'arena-draft') {
-			console.log('arena draft, not processing');
+			// console.log('arena draft, not processing');
 			return null;
 		}
-		console.log('building stat for', message.reviewId, message.replayKey);
+		// console.log('building stat for', message.reviewId, message.replayKey);
 		const replayString = await this.loadReplayString(message.replayKey);
 		if (!replayString || replayString.length === 0) {
-			console.log('empty replay, returning');
+			// console.log('empty replay, returning');
 			return null;
 		}
-		console.log('loaded replay string', replayString.length);
+		// console.log('loaded replay string', replayString.length);
 		const replay: Replay = this.buildReplay(replayString);
 		const stats = await Promise.all(StatsBuilder.statBuilders.map(builder => builder.extractStat(message, replay)));
-		console.log('built stats', stats);
+		// console.log('built stats', stats);
 		const result = Object.assign(
 			new MatchStats(),
 			{
@@ -42,7 +42,7 @@ export class StatsBuilder {
 			} as MatchStats,
 			...stats,
 		);
-		console.log('saving result', result);
+		// console.log('saving result', result);
 		await this.saveStat(result);
 		return result;
 	}
