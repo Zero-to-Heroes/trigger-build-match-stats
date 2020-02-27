@@ -1,10 +1,10 @@
 import { GameTag } from '@firestone-hs/replay-parser';
-import { MatchStats } from '../match-stats';
-import { Replay } from '../replay';
-import { ReviewMessage } from '../review-message';
-import { StatBuilder } from './_stat-builder';
+import { MatchStats } from '../../match-stats';
+import { Replay } from '../../replay';
+import { ReviewMessage } from '../../review-message';
+import { MatchStatBuilder } from './_match-stat-builder';
 
-export class TotalCardPlayedBuilder implements StatBuilder {
+export class TotalCardPlayedBuilder implements MatchStatBuilder {
 	public async extractStat(message: ReviewMessage, replay: Replay): Promise<MatchStats> {
 		const cardPlayedChanges = replay.replay
 			.findall(`.//TagChange[@tag='${GameTag.NUM_CARDS_PLAYED_THIS_TURN}']`)

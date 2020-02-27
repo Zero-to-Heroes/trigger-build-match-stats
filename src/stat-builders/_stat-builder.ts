@@ -1,7 +1,6 @@
-import { MatchStats } from '../match-stats';
-import { Replay } from '../replay';
+import { Replay } from '@firestone-hs/hs-replay-xml-parser';
 import { ReviewMessage } from '../review-message';
 
 export interface StatBuilder {
-	extractStat(message: ReviewMessage, replay: Replay): Promise<MatchStats>;
+	extractAndSaveStat(message: ReviewMessage, replay: Replay, replayXml: string): Promise<void>;
 }

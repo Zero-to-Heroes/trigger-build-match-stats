@@ -1,92 +1,36 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { CardType, GameTag } from '@firestone-hs/replay-parser';
-import { parse } from 'elementtree';
+import { parseHsReplayString, Replay } from '@firestone-hs/hs-replay-xml-parser';
 import fetch, { RequestInfo } from 'node-fetch';
-import db from './db/rds';
 import { MatchStats } from './match-stats';
-import { Replay } from './replay';
 import { ReviewMessage } from './review-message';
-import { TotalCardPlayedBuilder } from './stat-builders/total-cards-played-builder';
-import { TotalManaSpentBuilder } from './stat-builders/total-mana-spent-builder';
-import { TotalTurnsBuilder } from './stat-builders/total-turns-builder';
-import { StatBuilder } from './stat-builders/_stat-builder';
+import { BgsBuilder } from './stat-builders/battlegrounds/bgs-builder';
+import { GlobalBuilder } from './stat-builders/_global-builder';
 
 export class StatsBuilder {
-	private static readonly statBuilders: readonly StatBuilder[] = StatsBuilder.initializeBuilders();
+	private static readonly globalBuilders: readonly GlobalBuilder[] = StatsBuilder.initializeGlobalBuilders();
 
 	public async buildStats(messages: readonly ReviewMessage[]): Promise<readonly MatchStats[]> {
 		return await Promise.all(messages.map(msg => this.buildStat(msg)));
 	}
 
 	private async buildStat(message: ReviewMessage): Promise<MatchStats> {
-		// console.log('processing message', message);
-		if (message.gameMode == 'arena-draft') {
-			// console.log('arena draft, not processing');
+		console.log('processing message');
+		if (message.application !== 'firestone') {
+			console.log('not a firestone replay, not processing');
 			return null;
 		}
 		// console.log('building stat for', message.reviewId, message.replayKey);
 		const replayString = await this.loadReplayString(message.replayKey);
 		if (!replayString || replayString.length === 0) {
-			// console.log('empty replay, returning');
+			console.log('empty replay, returning');
 			return null;
 		}
-		// console.log('loaded replay string', replayString.length);
-		const replay: Replay = this.buildReplay(replayString);
-		const stats = await Promise.all(StatsBuilder.statBuilders.map(builder => builder.extractStat(message, replay)));
-		// console.log('built stats', stats);
-		const result = Object.assign(
-			new MatchStats(),
-			{
-				reviewId: message.reviewId,
-				replayKey: message.replayKey,
-			} as MatchStats,
-			...stats,
+		console.log('loaded replay string', replayString.length);
+		const replay: Replay = parseHsReplayString(replayString);
+		await Promise.all(
+			StatsBuilder.globalBuilders.map(builder => builder.buildAndSaveStat(message, replay, replayString)),
 		);
-		// console.log('saving result', result);
-		await this.saveStat(result);
-		return result;
-	}
-
-	private buildReplay(replayString: string): Replay {
-		const elementTree = parse(replayString);
-		const mainPlayerId = elementTree
-			.findall(`.//ShowEntity`)
-			.filter(showEntity => showEntity.get('cardID'))
-			.filter(showEntity => {
-				const cardTypeTag = showEntity.find(`Tag[@tag='${GameTag.CARDTYPE}']`);
-				return !cardTypeTag || parseInt(cardTypeTag.get('value')) !== CardType.ENCHANTMENT;
-			})
-			.filter(showEntity => showEntity.find(`Tag[@tag='${GameTag.CONTROLLER}']`))
-			.map(showEntity => showEntity.find(`Tag[@tag='${GameTag.CONTROLLER}']`))
-			.map(tag => parseInt(tag.get('value')))
-			.find(controllerId => controllerId);
-		return Object.assign(new Replay(), {
-			replay: elementTree,
-			mainPlayerId: mainPlayerId,
-		} as Replay);
-	}
-
-	private async saveStat(stat: MatchStats): Promise<void> {
-		const mysql = await db.getConnection();
-		await mysql.query(`
-			INSERT INTO match_stats (
-				reviewId, 
-				replayKey,
-				numberOfTurns,
-				playerTotalManaSpent,
-				opponentTotalManaSpent,
-				playerTotalCardsPlayed,
-				opponentTotalCardsPlayed
-			)
-			VALUES (
-				'${stat.reviewId}',
-				'${stat.replayKey}',
-				'${stat.numberOfTurns}',
-				'${stat.playerTotalManaSpent}',
-				'${stat.opponentTotalManaSpent}',
-				'${stat.playerTotalCardsPlayed}',
-				'${stat.opponentTotalCardsPlayed}'
-			)`);
+		console.log('operation successful');
 	}
 
 	private async loadReplayString(replayKey: string): Promise<string> {
@@ -94,8 +38,8 @@ export class StatsBuilder {
 		return data;
 	}
 
-	private static initializeBuilders(): readonly StatBuilder[] {
-		return [new TotalTurnsBuilder(), new TotalManaSpentBuilder(), new TotalCardPlayedBuilder()];
+	private static initializeGlobalBuilders(): readonly GlobalBuilder[] {
+		return [new BgsBuilder()];
 	}
 }
 

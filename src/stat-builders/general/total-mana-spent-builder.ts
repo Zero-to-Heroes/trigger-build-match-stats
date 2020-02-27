@@ -1,10 +1,10 @@
 import { GameTag } from '@firestone-hs/replay-parser';
-import { MatchStats } from '../match-stats';
-import { Replay } from '../replay';
-import { ReviewMessage } from '../review-message';
-import { StatBuilder } from './_stat-builder';
+import { MatchStats } from '../../match-stats';
+import { Replay } from '../../replay';
+import { ReviewMessage } from '../../review-message';
+import { MatchStatBuilder } from './_match-stat-builder';
 
-export class TotalManaSpentBuilder implements StatBuilder {
+export class TotalManaSpentBuilder implements MatchStatBuilder {
 	public async extractStat(message: ReviewMessage, replay: Replay): Promise<MatchStats> {
 		const resourcesSpentChanges = replay.replay
 			.findall(`.//TagChange[@tag='${GameTag.NUM_RESOURCES_SPENT_THIS_GAME}']`)

@@ -10,7 +10,7 @@ Resources:
         Properties:
             Handler: build-match-stats.default
             Runtime: nodejs8.10
-            Timeout: 60
+            Timeout: 120
             CodeUri: ./dist/build-match-stats
             MemorySize: 256
             Policies:
