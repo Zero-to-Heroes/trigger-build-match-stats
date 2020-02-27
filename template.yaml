@@ -22,4 +22,4 @@ Resources:
                 ReviewPublishedSnsTopic:
                     Type: SNS
                     Properties:
-                        Topic: arn:aws:sns:us-west-2:478062583808:review-published
+                        Topic: arn:aws:sns:us-west-2:478062583808:review-published-firestone
