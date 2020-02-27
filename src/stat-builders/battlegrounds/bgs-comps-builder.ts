@@ -23,11 +23,13 @@ export class BgsCompsBuilder implements StatBuilder {
 			INSERT INTO bgs_comps
 			(
 				reviewId,
+				finalPosition,
 				compsByTurn
 			)
 			VALUES 
 			(
 				'${message.reviewId}',
+				'${message.additionalResult}',
 				'${JSON.stringify(compsByTurn.toJS())}'
 			)
 		`;

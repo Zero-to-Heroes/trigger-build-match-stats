@@ -3,4 +3,5 @@ export interface ReviewMessage {
 	readonly replayKey: string;
 	readonly gameMode: string;
 	readonly application: string;
+	readonly additionalResult: string;
 }
