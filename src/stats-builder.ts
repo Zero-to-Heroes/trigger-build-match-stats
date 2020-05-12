@@ -34,7 +34,7 @@ export class StatsBuilder {
 	}
 
 	private async loadReplayString(replayKey: string): Promise<string> {
-		const data = await http(`https://s3-us-west-2.amazonaws.com/com.zerotoheroes.output/${replayKey}`);
+		const data = await http(`http://xml.firestoneapp.com/${replayKey}`);
 		return data;
 	}
 
