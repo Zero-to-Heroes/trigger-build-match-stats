@@ -1,4 +1,4 @@
-import { Replay } from '@firestone-hs/hs-replay-xml-parser';
+import { Replay } from '@firestone-hs/hs-replay-xml-parser/dist/public-api';
 import { ReviewMessage } from '../../review-message';
 import { GlobalBuilder } from '../_global-builder';
 import { StatBuilder } from '../_stat-builder';

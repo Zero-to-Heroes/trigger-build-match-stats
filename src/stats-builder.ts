@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { parseHsReplayString, Replay } from '@firestone-hs/hs-replay-xml-parser';
+import { parseHsReplayString, Replay } from '@firestone-hs/hs-replay-xml-parser/dist/public-api';
 import fetch, { RequestInfo } from 'node-fetch';
 import { MatchStats } from './match-stats';
 import { ReviewMessage } from './review-message';
