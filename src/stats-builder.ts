@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { parseHsReplayString, Replay } from '@firestone-hs/hs-replay-xml-parser/dist/public-api';
-import fetch, { RequestInfo } from 'node-fetch';
 import { S3 } from './db/s3';
 import { MatchStats } from './match-stats';
 import { ReviewMessage } from './review-message';
@@ -37,7 +36,9 @@ export class StatsBuilder {
 	}
 
 	private async loadReplayString(replayKey: string): Promise<string> {
-		const data = await s3.readContentAsString('xml.firestoneapp.com', replayKey);
+		const data = replayKey.endsWith('.zip')
+			? await s3.readZippedContent('xml.firestoneapp.com', replayKey)
+			: await s3.readContentAsString('xml.firestoneapp.com', replayKey);
 		// const data = await http(`http://xml.firestoneapp.com/${replayKey}`);
 		return data;
 	}
@@ -46,16 +47,3 @@ export class StatsBuilder {
 		return [new BgsBuilder()];
 	}
 }
-
-const http = async (request: RequestInfo): Promise<any> => {
-	return new Promise(resolve => {
-		fetch(request)
-			.then(response => {
-				// console.log('received response', response);
-				return response.text();
-			})
-			.then(body => {
-				resolve(body);
-			});
-	});
-};
